@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#050D17">
+<title>Shiori · VNDB</title>
+<link rel="preconnect" href="https://api.vndb.org">
+<link rel="preconnect" href="https://t.vndb.org">
+<link rel="stylesheet" href="assets/style.css?v=103">
+</head>
+<body>
+<div class="app" id="app">
+  <main class="screen" id="screen" role="main"></main>
+
+  <nav class="tabbar" id="tabbar" hidden>
+    <button class="tab" data-tab="home" aria-label="推荐">
+      <span class="tab-ico" data-icon="home"></span><span class="tab-label">推荐</span>
+    </button>
+    <button class="tab" data-tab="calendar" aria-label="发售">
+      <span class="tab-ico" data-icon="calendar"></span><span class="tab-label">发售</span>
+    </button>
+    <button class="tab" data-tab="library" aria-label="收藏">
+      <span class="tab-ico" data-icon="heart"></span><span class="tab-label">收藏</span>
+    </button>
+    <button class="tab" data-tab="settings" aria-label="我的">
+      <span class="tab-ico" data-icon="settings"></span><span class="tab-label">我的</span>
+    </button>
+  </nav>
+
+  <div class="overlay-root" id="overlayRoot"></div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+<script src="assets/app.js?v=103"></script>
+</body>
+</html>
