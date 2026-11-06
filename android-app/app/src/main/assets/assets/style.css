@@ -305,7 +305,22 @@ html[data-theme="light"] .tabbar{ background:rgba(255,255,255,.88); }
 .tab:active{ opacity:.7; }
 
 /* ---------- search ---------- */
-.search-wrap{ position:sticky; top:0; z-index:8; padding:12px 16px 10px; background:linear-gradient(var(--bg) 62%, transparent); }
+.search-wrap{
+  position:sticky; top:0; z-index:8;
+  padding:calc(12px + var(--safe-top)) 16px 10px;
+  background:var(--bg);
+}
+.app.is-search .screen{ padding-top:0; }
+
+/* 收藏页排序 */
+.sort-row{ padding:0 16px 10px; display:flex; }
+.sort-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  height:34px; padding:0 13px; border-radius:999px;
+  background:var(--chip); border:1px solid var(--line);
+  color:var(--ink-2); font-size:12px; font-weight:650;
+}
+.sort-btn svg{ width:14px; height:14px; color:var(--brand); }
 .search-box{
   display:flex; align-items:center; gap:9px;
   height:48px; padding:0 8px 0 15px;

@@ -1206,7 +1206,6 @@
           '<div class="wash"></div>' +
           '<div class="d-top">' +
             '<button class="icon-btn" data-act="back">' + icon('arrowL') + '</button>' +
-            '<button class="icon-btn" data-act="share-vn">' + icon('share') + '</button>' +
           '</div>' +
           '<div class="d-cover">' +
             '<div class="poster' + (landPoster ? ' land' : '') + nsfwPoster + '"' + posterStyle + ' data-cover>' +
@@ -1268,11 +1267,6 @@
       const act = e.target.closest('[data-act]');
       if (!act) return;
       if (act.dataset.act === 'back') back();
-      if (act.dataset.act === 'share-vn') {
-        const url = 'https://vndb.org/' + vn.id;
-        if (navigator.share) navigator.share({ title: vn.title, url }).catch(() => {});
-        else { try { navigator.clipboard.writeText(url); toast('链接已复制'); } catch (err) { openExternal(url); } }
-      }
       if (act.dataset.act === 'fav' || act.dataset.act === 'list') openListSheet(vn);
       if (act.dataset.act === 'vote') openVoteSheet(vn);
       if (act.dataset.act === 'my-length') openMyLengthSheet(vn);
@@ -1774,8 +1768,6 @@
 
     screen.innerHTML = '<div class="char-page">' +
       '<div class="char-hero">' +
-        (img ? '<div class="bg" style="background-image:url(&quot;' + esc(img) + '&quot;)"></div>' : '') +
-        '<div class="wash"></div>' +
         '<div class="d-top"><button class="icon-btn" data-act="back">' + icon('arrowL') + '</button>' +
           '<button class="icon-btn" data-act="open-char-vndb">' + icon('link') + '</button></div>' +
         '<div class="d-head" style="align-items:center">' +
@@ -1922,7 +1914,34 @@
   }
 
   /* ---------------- library ---------------- */
-  const libState = { label: 0, items: [], page: 1, more: true, loading: false, labels: [] };
+  const libState = { label: 0, items: [], page: 1, more: true, loading: false, labels: [], sort: 'added', reverse: true, sortName: '最近添加' };
+  const LIB_SORTS = [
+    ['added', true, '最近添加'],
+    ['lastmod', true, '最近修改'],
+    ['vote', true, '我的评分'],
+    ['rating', true, '作品评分'],
+    ['released', true, '发售日'],
+    ['title', false, '标题'],
+  ];
+
+  function openLibSortSheet() {
+    openSheet('<h2>排序</h2><div class="s-sub">收藏列表的排列方式</div>' +
+      '<div class="opt-row" style="margin-top:8px">' +
+      LIB_SORTS.map(s => '<button class="opt' + (libState.sort === s[0] ? ' on' : '') +
+        '" data-sort-key="' + s[0] + '" data-sort-rev="' + s[1] + '">' + s[2] + '</button>').join('') +
+      '</div>', (root) => {
+        root.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-sort-key]');
+          if (!b) return;
+          libState.sort = b.dataset.sortKey;
+          libState.reverse = b.dataset.sortRev === 'true';
+          libState.sortName = b.textContent.trim();
+          closeSheet();
+          libState.page = 1;
+          loadLibraryItems(navSeq, true);
+        });
+      });
+  }
 
   async function renderLibrary() {
     const runId = ++navSeq;
@@ -1998,8 +2017,8 @@
       user: state.user.id,
       results: 30,
       page: libState.page,
-      sort: 'added',
-      reverse: true,
+      sort: libState.sort,
+      reverse: libState.reverse,
       fields: 'id,vote,labels{id,label},vn{' + CARD_FIELDS + '}',
     };
     if (libState.label) body.filters = ['label', '=', libState.label];
@@ -2063,6 +2082,8 @@
       '<div class="chips" id="libChips" style="padding-top:14px">' +
         statusRow.map(s => '<button class="chip' + (libState.label === s[0] ? ' is-on' : '') + '" data-label="' + s[0] + '">' + s[1] + '</button>').join('') +
       '</div>' +
+      '<div class="sort-row" id="libSort"><button class="sort-btn" data-act="lib-sort">' + icon('sliders') +
+        '排序：' + esc(libState.sortName) + '</button></div>' +
       '<div id="libGrid" class="grid">' + libraryCards(libState.items) + '</div>' +
       '<div id="libBody"></div>' +
       '<div class="loader" id="libLoader" hidden><span class="spin"></span>加载中</div>' +
@@ -2075,6 +2096,10 @@
       $$('.chip', $('#libChips')).forEach(x => x.classList.toggle('is-on', x === b));
       libState.page = 1;
       loadLibraryItems(navSeq, true);
+    });
+
+    $('#libSort').addEventListener('click', (e) => {
+      if (e.target.closest('[data-act="lib-sort"]')) openLibSortSheet();
     });
 
     $('[data-act="logout"]').addEventListener('click', () => {
@@ -2100,7 +2125,7 @@
     try {
       const body = {
         user: state.user.id, results: 30, page: libState.page,
-        sort: 'added', reverse: true,
+        sort: libState.sort, reverse: libState.reverse,
         fields: 'id,vote,labels{id,label},vn{' + CARD_FIELDS + '}',
       };
       if (libState.label) body.filters = ['label', '=', libState.label];
@@ -2171,7 +2196,7 @@
       '</div></div>' +
 
       '<div class="set-group"><h3>关于</h3><div class="set-card">' +
-        '<div class="set-row"><div class="set-ico">' + icon('tag') + '</div><div class="set-main"><div class="set-name">Shiori v0.1 · b108</div>' +
+        '<div class="set-row"><div class="set-ico">' + icon('tag') + '</div><div class="set-main"><div class="set-name">Shiori v0.1 · b109</div>' +
         '<div class="set-desc">数据来自 VNDB Kana API · 原型仅演示界面与交互</div></div></div>' +
         '<div class="set-row" data-act="open-vndb"><div class="set-ico">' + icon('link') + '</div><div class="set-main"><div class="set-name">VNDB 官网</div>' +
         '<div class="set-desc">非官方应用，数据版权归 VNDB 及贡献者</div></div>' +
@@ -2310,6 +2335,7 @@
     const isTab = ['home', 'calendar', 'library', 'settings'].includes(name);
     tabbar.hidden = !isTab;
     appEl.classList.toggle('is-detail', !isTab);
+    appEl.classList.toggle('is-search', name === 'search');
     $$('.tab', tabbar).forEach(t => t.classList.toggle('is-on', t.dataset.tab === name));
   }
 
